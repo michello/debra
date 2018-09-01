@@ -1,5 +1,5 @@
 import os
-import Cookie
+from http import cookies
 
 from twilio import twiml
 from twilio.rest import Client
@@ -15,7 +15,7 @@ TWILIO_TOKEN = os.environ['TWILIO_TOKEN']
 
 t_client = Client(TWILIO_SID, TWILIO_TOKEN)
 
-C = Cookie.SimpleCookie()
+C = cookies.SimpleCookie()
 
 @app.route("/incoming_sms", methods=['GET', 'POST'])
 def incoming_sms():
