@@ -36,8 +36,9 @@ def add_Giver(num, item, u_id, loc, sup):
         number=num, item=item, user_id=u_id, location=loc, supply=sup)
     giver.put()
 
-def main():
-    add_Giver('12341452', 'food', 1, '12345', True)
+def add_Needer(num, item, u_id, loc, complete):
+    needer = Need(
+        number=num, item=item, user_id=u_id, location=loc, completion = complete)
+    needer.put()
 
-main()
 

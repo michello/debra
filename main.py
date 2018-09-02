@@ -7,6 +7,8 @@ from twilio.twiml.messaging_response import MessagingResponse
 
 from flask import Flask, request, redirect, session, make_response
 
+# import dbDEBRA 
+
 app = Flask(__name__)
 app.config.from_object(__name__)
 
@@ -24,6 +26,7 @@ def incoming_sms():
 
   if request.method == 'POST':
     message_body = request.values.get('Body', None)
+    print(request.values)
     
     if message_body == 'HI DEBRA':
     	resp_message = "Hello! I am DEBRA (Disaster Emergency Bot Relief Alert). First, please provide the address you currently are at by typing, 'I am currently at...'"
@@ -32,12 +35,16 @@ def incoming_sms():
     	resp_message = "Thanks! If you wish to receive supplies or help, please start your text either with 'I can provide...' or 'I need these supplies...'"
     elif 'I need these supplies' in message_body:
     	# save stuff into db
-    	C["cookie_request"] = message_body.replace('I am currently at ','')
-    	resp_message = "Thanks for your request! I'll update you when there's someone with your supplies ASAP. (:"
+      item = message_body.split("I need these supplies")[-1].strip()
+      C["cookie_request"] = message_body.replace('I am currently at ','')
+      addNeeder('023456789', item, 1, C["cookie_request"], False)
+      resp_message = "Thanks for your request! I'll update you when there's someone with your supplies ASAP. (:"
     elif 'I can provide' in message_body:
     	# save stuff into db
-    	C["cookie_request"] = message_body.replace('I am currently at ','')
-    	resp_message = "Thanks for your request! I'll update you."
+      item = message_body.split("I can provide")[-1].strip()
+      C["cookie_request"] = message_body.replace('I am currently at ','')
+      addGiver('123456789', item, 1, C["cookie_request"], 10)
+      resp_message = "Thanks for your request! I'll update you."
     else:
     	resp_message = "Whoops, that is an invalid text! Feel free to text 'Help!' for a full list of commands. :)"
 	
