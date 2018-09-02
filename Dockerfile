@@ -20,5 +20,5 @@ RUN pip install -r requirements.txt
 
 RUN export PATH=$PATH:/google-cloud-sdk/bin/
 
-CMD python /google-cloud-sdk/bin/dev_appserver.py app.yaml --host=0.0.0.0 --port=5000 --runtime python27
+CMD python /google-cloud-sdk/bin/dev_appserver.py app.yaml --host=0.0.0.0 --port=5000 --runtime python27 --enable_host_checking=false
 

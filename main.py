@@ -1,13 +1,12 @@
 import os
-from http import cookies
+import Cookie
 
 from twilio import twiml
 from twilio.rest import Client
 from twilio.twiml.messaging_response import MessagingResponse
 
 from flask import Flask, request, redirect, session, make_response
-
-# import dbDEBRA 
+from google.cloud import firestore
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -17,7 +16,12 @@ TWILIO_TOKEN = os.environ['TWILIO_TOKEN']
 
 t_client = Client(TWILIO_SID, TWILIO_TOKEN)
 
-C = cookies.SimpleCookie()
+C = Cookie.SimpleCookie()
+
+db = firestore.Client()
+
+givers_ref = db.collection(u'GiverCalls')
+needers_ref = db.collection(u'NeederCalls')
 
 @app.route("/incoming_sms", methods=['GET', 'POST'])
 def incoming_sms():
@@ -26,7 +30,7 @@ def incoming_sms():
 
   if request.method == 'POST':
     message_body = request.values.get('Body', None)
-    print(request.values)
+    number = request.values.get('from', None)
     
     if message_body == 'HI DEBRA':
     	resp_message = "Hello! I am DEBRA (Disaster Emergency Bot Relief Alert). First, please provide the address you currently are at by typing, 'I am currently at...'"
@@ -37,17 +41,31 @@ def incoming_sms():
     	# save stuff into db
       item = message_body.split("I need these supplies")[-1].strip()
       C["cookie_request"] = message_body.replace('I am currently at ','')
-      addNeeder('023456789', item, 1, C["cookie_request"], False)
+      needer = {
+          u'number': number,
+          u'item': item,
+          u'user_id': 1,
+          u'location':C["cookie_request"],
+          u'completion': False
+      }
+      needers_ref.document(number).set(needer)
       resp_message = "Thanks for your request! I'll update you when there's someone with your supplies ASAP. (:"
     elif 'I can provide' in message_body:
     	# save stuff into db
       item = message_body.split("I can provide")[-1].strip()
       C["cookie_request"] = message_body.replace('I am currently at ','')
-      addGiver('123456789', item, 1, C["cookie_request"], 10)
+      giver = {
+          u'number': number,
+          u'item': item,
+          u'user_id': 1,
+          u'location':C["cookie_request"],
+          u'supply': True
+      }
+      givers_ref.document(number).set(giver)
       resp_message = "Thanks for your request! I'll update you."
     else:
     	resp_message = "Whoops, that is an invalid text! Feel free to text 'Help!' for a full list of commands. :)"
-	
+
   resp.message(resp_message)
   return str(resp)
 
