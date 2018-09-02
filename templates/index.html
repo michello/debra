@@ -1,0 +1,101 @@
+<html>
+  <head>
+	<meta name="viewport" content="initial-scale=1.0, width=device-width" />
+	<link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.0/mapsjs-ui.css?dp-version=1533195059" />
+	<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-core.js"></script>
+	<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-service.js"></script>
+	<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-ui.js"></script>
+	<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-mapevents.js"></script>
+  </head>
+  <body>
+  <div style="width: 640px; height: 480px" id="mapContainer"></div>
+  <script>
+  	var locations = '{{ jslocation }}';
+    // Initialize the platform object:
+    var platform = new H.service.Platform({
+    	'app_id': 'sxFfw63ySzbG1QHpwaam',
+    	'app_code': 'WDaXK-QxnzkgBDjJZyVCFg',
+   		useHTTPS: true
+    });
+
+    // Obtain the default map types from the platform object
+    //var maptypes = platform.createDefaultLayers();
+    var pixelRatio = window.devicePixelRatio || 1;
+	var defaultLayers = platform.createDefaultLayers({
+  		tileSize: pixelRatio === 1 ? 256 : 512,
+  		ppi: pixelRatio === 1 ? undefined : 320
+	});
+
+    // Instantiate (and display) a map object:
+    //var map = new H.Map(document.getElementById('mapContainer'));
+    var map = new H.Map(document.getElementById('mapContainer'),
+	  defaultLayers.normal.map,{
+	  center: {lat: 53.430, lng: -2.961},
+	  zoom: 7,
+	  pixelRatio: pixelRatio
+	});
+    
+    function addMarkerToGroup(group, coordinate, html){
+    	var icon = new H.map.Icon('/static/pinpoint.png'), 
+        marker = new H.map.Marker(position, { icon: icon});
+    	marker.setData(html);
+    	group.addObject(marker);
+    }
+
+    function addInfoBubble(map, locations) {
+	  var group = new H.map.Group();
+
+	  map.addObject(group);
+
+	  // add 'tap' event listener, that opens info bubble, to the group
+	  group.addEventListener('tap', function (evt) {
+	    // event target is the marker itself, group is a parent event target
+	    // for all objects that it contains
+	    var bubble =  new H.ui.InfoBubble(evt.target.getPosition(), {
+	      // read custom data
+	      content: evt.target.getData()
+	    });
+	    // show info bubble
+	    ui.addBubble(bubble);
+	  }, false);
+	 
+	  var position, marker;
+
+	  // Add a marker for each location found
+	  for (i = 0;  i < locations.length; i++) {
+	  	position = {
+	    	lat: locations[i].Location.DisplayPosition.Latitude,
+	    	lng: locations[i].Location.DisplayPosition.Longitude
+	  	};
+	  	marker = new H.map.Marker(position);
+	  	map.addObject(marker);
+	  }
+
+	};
+
+	// Get an instance of the geocoding service:
+	var geocoder = platform.getGeocodingService();
+	locations.forEach(function(location){
+		var geocodingParams = {
+		    searchText: location
+		  };
+		geocoder.geocode(geocodingParams, onResult, function(e) {
+		  alert(e);
+		});
+	});
+	
+	var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+
+	// create default UI with layers provided by the platform
+	var ui = H.ui.UI.createDefault(map, defaultLayers);
+
+	addInfoBubble(map, '{{ jslocation }}' );
+	
+
+
+
+    
+
+  </script>
+  </body>
+</html>
