@@ -32,40 +32,48 @@ def incoming_sms():
     message_body = request.values.get('Body', None)
     number = request.values.get('from', None)
     
-    if message_body == 'HI DEBRA':
+    if message_body.upper() == 'HI DEBRA':
     	resp_message = "Hello! I am DEBRA (Disaster Emergency Bot Relief Alert). First, please provide the address you currently are at by typing, 'I am currently at...'"
     elif 'I am currently at' in message_body:
     	C["cookie_location"] = message_body.replace('I am currently at ','')
-    	resp_message = "Thanks! If you wish to receive supplies or help, please start your text either with 'I can provide...' or 'I need these supplies...'"
+        print(C["cookie_location"])
+        resp_message = "Thanks! If you wish to receive supplies or help, please start your text either with 'I can provide...' or 'I need these supplies...'"
     elif 'I need these supplies' in message_body:
     	# save stuff into db
       item = message_body.split("I need these supplies")[-1].strip()
-      C["cookie_request"] = message_body.replace('I am currently at ','')
+      #C["cookie_request"] = message_body.replace('I am currently at ','')
+      #print(C["cookie_location"])
       needer = {
           u'number': number,
           u'item': item,
           u'user_id': 1,
-          u'location':C["cookie_request"],
+          u'location': C["cookie_location"].value,
           u'completion': False
       }
       needers_ref.document(number).set(needer)
+      needers = needers_ref.get()
+      for needer in needers:
+        print (u'{} => {}'.format(needer.id, needer.to_dict()))
       resp_message = "Thanks for your request! I'll update you when there's someone with your supplies ASAP. (:"
     elif 'I can provide' in message_body:
     	# save stuff into db
       item = message_body.split("I can provide")[-1].strip()
-      C["cookie_request"] = message_body.replace('I am currently at ','')
       giver = {
           u'number': number,
           u'item': item,
           u'user_id': 1,
-          u'location':C["cookie_request"],
+          u'location':C["cookie_location"].value,
           u'supply': True
       }
       givers_ref.document(number).set(giver)
+      givers = givers_ref.get()
+      for giver in givers:
+        print (u'{} => {}'.format(giver.id, giver.to_dict()))
       resp_message = "Thanks for your request! I'll update you."
     else:
     	resp_message = "Whoops, that is an invalid text! Feel free to text 'Help!' for a full list of commands. :)"
 
+  print("hello!!!!")
   resp.message(resp_message)
   return str(resp)
 
