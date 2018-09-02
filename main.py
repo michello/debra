@@ -30,7 +30,7 @@ def incoming_sms():
 
   if request.method == 'POST':
     message_body = request.values.get('Body', None)
-    number = request.values.get('from', None)
+    number = request.values.get('From', None)
     
     if message_body.upper() == 'HI DEBRA':
     	resp_message = "Hello! I am DEBRA (Disaster Emergency Bot Relief Alert). First, please provide the address you currently are at by typing, 'I am currently at...'"
