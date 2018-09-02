@@ -87,7 +87,6 @@
   
   <script>
 	  	var locations = {{ jslocation|tojson }};
-	    
 		function addMarkerToGroup(group, coordinate, html) {
 		  var marker = new H.map.Marker(coordinate);
 		  marker.setData(html);
@@ -107,10 +106,12 @@
 		  }, false);
 
 		  locations.forEach(function(location) {
-		  	addMarkerToGroup(group, {lat:location[0], lng:location[1]},
-		  		'<div class="donate">' +
-			    '<div><a href=\'http://www.mcfc.co.uk\' >Manchester City</a>' +
-			    '</div><div>City of Manchester Stadium<br>Capacity: 48,000</div></div>');
+		  	var type = location['type'];
+		  	var item = location['item'];
+		  	var addr = location['address'];
+		  	var num = location['number'];
+		  	addMarkerToGroup(group, {lat:location['coordinates'][0], lng:location['coordinates'][1]},
+		  		'<div>'+addr + '<br>' + num + '<br>' + type+':' + item + '</div>');
 		  })
 		}
 
