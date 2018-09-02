@@ -1,0 +1,128 @@
+<html>
+  <head>
+	<meta name="viewport" content="initial-scale=1.0, width=device-width" />
+	<link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.0/mapsjs-ui.css?dp-version=1533195059" />
+	<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-core.js"></script>
+	<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-service.js"></script>
+	<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-ui.js"></script>
+	<script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-mapevents.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<style>
+
+		header {
+			width: 640px;
+			text-align: center;
+		}
+
+		#container {
+			margin: 0 auto;
+			width: 50%;
+		}
+
+		#map {
+			width: 640px;
+			height: 480px;
+		}
+
+		#sidebar {
+			margin-top: 20px;
+		    width: 640px;
+		    text-align: center;
+		}
+
+		button {
+		    width: 160px;
+		    height: 40px;
+		    border: none;
+		}
+
+		#sidebar .key {
+			float:right;
+			width: 160px;
+			line-height:40px;
+		}
+
+
+	</style>
+  </head>
+  <body>
+  <div id="content">
+  	<div id="container">
+  		<header style="margin-bottom: 20px;">DEBORA</header>
+	  	<div style="width: 640px; height: 480px" id="map"></div>
+	  	<div id="sidebar">
+	  		<span style="width: 160px; line-height:40px;">Filter: </span>
+	  		<div class="key">Giving</div>
+	  		<div class="key">Needing</div>
+	  		<div class="key">All</div>	  		
+	  	</div>
+  	</div>
+  </div>
+  
+  <script>
+	  	var locations = {{ jslocation|tojson }};
+	    
+		function addMarkerToGroup(group, coordinate, html) {
+		  var marker = new H.map.Marker(coordinate);
+		  marker.setData(html);
+		  group.addObject(marker);
+		}
+
+		function addInfoBubble(map) {
+		  var group = new H.map.Group();
+
+		  map.addObject(group);
+
+		  group.addEventListener('tap', function (evt) {
+		    var bubble =  new H.ui.InfoBubble(evt.target.getPosition(), {
+		      content: evt.target.getData()
+		    });
+		    ui.addBubble(bubble);
+		  }, false);
+
+		  locations.forEach(function(location) {
+		  	addMarkerToGroup(group, {lat:location[0], lng:location[1]},
+		  		'<div class="donate">' +
+			    '<div><a href=\'http://www.mcfc.co.uk\' >Manchester City</a>' +
+			    '</div><div>City of Manchester Stadium<br>Capacity: 48,000</div></div>');
+		  })
+		}
+
+
+
+		/**
+		 * Boilerplate map initialization code starts below:
+		 */
+
+		// initialize communication with the platform
+		var platform = new H.service.Platform({
+		  app_id: 'devportal-demo-20180625',
+		  app_code: '9v2BkviRwi9Ot26kp2IysQ',
+		  useHTTPS: true
+		});
+		var pixelRatio = window.devicePixelRatio || 1;
+		var defaultLayers = platform.createDefaultLayers({
+		  tileSize: pixelRatio === 1 ? 256 : 512,
+		  ppi: pixelRatio === 1 ? undefined : 320
+		});
+
+		// initialize a map - this map is centered over Europe
+		var map = new H.Map(document.getElementById('map'),
+		  defaultLayers.normal.map,{
+		  center: {lat: 40.713, lng: -74.006},
+		  zoom: 10,
+		  pixelRatio: pixelRatio
+		});
+
+		// MapEvents enables the event system
+		// Behavior implements default interactions for pan/zoom (also on mobile touch environments)
+		var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+
+		// create default UI with layers provided by the platform
+		var ui = H.ui.UI.createDefault(map, defaultLayers);
+
+		// Now use the map as required...
+		addInfoBubble(map);
+	  </script>
+	</body>
+</html>
