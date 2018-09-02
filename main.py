@@ -58,7 +58,18 @@ def incoming_sms():
       needers = needers_ref.get()
       for needer in needers:
         print (u'{} => {}'.format(needer.id, needer.to_dict()))
-      resp_message = "Thanks for your request! I'll update you when there's someone with your supplies ASAP. (:"
+      givers = givers_ref.get()
+      givers_lst = []
+      for giver in givers:
+        giving = giver.to_dict()
+        if giving[u'item'] == item:
+          givers_lst.append([giving[u'location'], giving[u'number']])
+      if len(givers_lst) == 0:
+        resp_message = "Thanks for your request! I'll update you when there's someone with your supplies ASAP. (:"
+      else:
+        resp_message = "Thanks for your request! Here are the locations with the supplies you need!\n"
+        for givering in givers_lst:
+          resp_message += givering[0] + ":" + givering[1] + "\n"
     elif 'I can provide' in message_body:
     	# save stuff into db
       item = message_body.split("I can provide")[-1].strip()
@@ -74,10 +85,25 @@ def incoming_sms():
       for giver in givers:
         print (u'{} => {}'.format(giver.id, giver.to_dict()))
       resp_message = "Thanks for your request! I'll update you."
+      needers_lst = []
+      needers = needers_ref.get()
+      for needer in needers:
+        needy = needer.to_dict()
+        if needy[u'item'] == item:
+          needers_lst.append(needy[u'number'])
+      for person in needers_lst:
+        print(person)
+        s_client = Client("ACbb4b9650631364e99781ded800fa9699", "0a068601c149167e134887defd6fc2a9")
+        message = s_client.messages.create(
+                              from_='+19893682123',
+                              body="Hey! Here's a new location with your supplies!\n" +  C["cookie_location"].value + ":" + number,
+                              to=person
+                          )
+    elif message_body.upper() == "HELP!":
+      resp_message = "Hi DEBRA: Activate DEBRA bot"
     else:
     	resp_message = "Whoops, that is an invalid text! Feel free to text 'Help!' for a full list of commands. :)"
 
-  print("hello!!!!")
   resp.message(resp_message)
   return str(resp)
 
