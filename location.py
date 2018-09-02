@@ -30,7 +30,6 @@ def locations():
 		loc_data['type'] = 'need'
 		loc.append(loc_data)
 	coordinates = []
-	print(loc)
 	for locate in loc:
 		try:
 			location = geolocator.geocode(locate)
