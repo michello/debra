@@ -5,10 +5,12 @@ from twilio import twiml
 from twilio.rest import Client
 from twilio.twiml.messaging_response import MessagingResponse
 
-from flask import Flask, request, redirect, session, make_response
+from flask import Flask, request, redirect, session, make_response, render_template
 from google.cloud import firestore
 
-app = Flask(__name__)
+from geopy.geocoders import Nominatim
+
+app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.config.from_object(__name__)
 
 TWILIO_SID = os.environ['TWILIO_SID']
@@ -31,6 +33,8 @@ def incoming_sms():
   if request.method == 'POST':
     message_body = request.values.get('Body', None)
     number = request.values.get('From', None)
+
+
     
     if message_body.upper() == 'HI DEBRA':
     	resp_message = "Hello! I am DEBRA (Disaster Emergency Bot Relief Alert). First, please provide the address you currently are at by typing, 'I am currently at...'"
@@ -76,6 +80,43 @@ def incoming_sms():
   print("hello!!!!")
   resp.message(resp_message)
   return str(resp)
+
+@app.route("/")
+def locations():
+  loc = []
+  givers = givers_ref.get()
+  needers = needers_ref.get()
+  geolocator = Nominatim()
+  for giver in givers:
+    giver_data = giver.to_dict()
+    loc_data = dict()
+    loc_data['number'] = giver_data['number']
+    loc_data['address'] = giver_data['location']
+    loc_data['item'] = giver_data[u'item']
+    loc_data['type'] = 'give'
+    try:
+      location = geolocator.geocode(loc_data['address'])
+      loc_data['coordinates'] = [location.latitude, location.longitude]
+    except:
+      loc_data['coordinates'] = [0.0, 0.0]
+    loc.append(loc_data)
+  for needer in needers:
+    needer_data = needer.to_dict()
+    loc_data = dict()
+    loc_data['number'] = needer_data['number']
+    loc_data['address'] = needer_data['location']
+    loc_data['item'] = needer_data[u'item']
+    loc_data['type'] = 'need'
+    try:
+      location = geolocator.geocode(loc_data['address'])
+      coordinates.append([location.latitude, location.longitude])
+      loc_data['coordinates'] = [location.latitude, location.longitude]
+    except:
+      loc_data['coordinates'] = [0.0, 0.0]
+    loc.append(loc_data)
+  print (loc)
+
+  return render_template("index.html", jslocation = loc)
 
 if __name__ == "__main__":
   app.secret_key = "SECRET_KEY"
