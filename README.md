@@ -1,5 +1,6 @@
 # debra ⚠️
-<p align="center">a disaster emergency bot for relief assistance</p>
+<p align="center">a disaster emergency bot for relief assistance<br>
+  quickly connecting disaster victims to the aid they need and volunteers to those they can help</p>
 <p align="center"><img src="https://i.gyazo.com/915d4c5ff8b1506686720f0865ee2bdc.png" height="200px;"/></p>
 
 
